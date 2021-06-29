@@ -35,6 +35,8 @@ Application Technical Stack
       LoadTest Application : python/kubernetes
       
       
+<img width="991" alt="Application-Design" src="https://user-images.githubusercontent.com/25478952/123872760-6e2b0180-d92d-11eb-8cce-4c7569334d84.png">
+      
 Application Design & GCP Design
 
     * Application is three tiered architecture with web requests served by react js frontend application. 
