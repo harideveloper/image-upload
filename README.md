@@ -151,7 +151,79 @@ Application high level components
     - Regional - MYSQL
     - Cost - MYSQL / Firestore (204 / Month)
     
+ IAM Policy
+   
+   Below service account and IAM policies to be applied for each resoource giving them least priviledge. Please find below high level role definition on each 	  resources, service accounts and IAM Roles. 
+    
+   ImageUI
+   	
+	Cloud Run - ImageUI ( ImageUI-ServiceAccount ) 
+	- ImageTerraform-ServiceAccount - roles/run.admin
     
     
+   ImageService 
+   	
+	Cloud Run - ImageService ( ImageService-ServiceAccount )
+		
+		- ImageUI-ServiceAccount/run.invoker
+		- ImageTerraform-ServiceAccount - roles/run.admin
+
+   ImageDB
+   
+   	Cloud Storage - ImageStorage ( ImageStorage-ServiceAccount )
+	
+		- ImageUI-ServiceAccount - roles/logging.viewAccessor
+		- ImageTerraform-ServiceAccount - roles/run.admin
     
+    
+   ImageStorageBuckets
+   
+   	Cloud Storage - ImageStorage ( ImageStorage-ServiceAccount )
+		
+		- ImageUI-ServiceAccount - roles/logging.viewAccessor
+		- ImageTerraform-ServiceAccount - roles/run.admin
+    
+    
+   CloudLogging
+    
+        CloudLogging ( CloudLogging-ServiceAccount )
+	
+		- ImageUI-ServiceAccount - roles/logging.viewAccessor
+ 		- ImageUI-ServiceAccount - roles/logging.bucketWriter
+ 		- ImageService-ServiceAccount  - roles/logging.viewAccessor
+ 		- ImageService-ServiceAccount  - roles/logging.bucketWriter
+ 		- CloudMonitor-ServiceAccount  - roles/logging.viewer
+        	- ImageDB-ServiceAccount roles/viewer
+
+    
+   Cloud Monitor
+    
+    	CloudMonitor ( CloudMonitor-ServiceAccount )
+		
+		- developer - roles/monitoring.viewer
+		- ops/developer - roles/monitoring.editor
+	
+   Terraform 
+   	
+	Terraform-user (ImageTerraform-service-account )
+	
+   SecretManager 
+   
+         - ImageTerraform-ServiceAccount - roles/run.admin —> roles/roles/roles/secretmanager.secretVersionManager
+         - ImageUI-ServiceAccount - roles/secretmanager.secretAccessor
+         - ImageService-ServiceAccount - roles/secretmanager.secretAccessor 
+
+   gitOps-Service-Account
+    
+	- roles/cloudbuild.builds.edito
+	- container Registry Roles Upload Image
+	
+   Cloud Load Balancing (CloudLoadBalancing-ServiceAccount)
+   
+        - ImageTerraform-ServiceAccount - roles/compute.instanceAdmin
+	
+   Locust/GKE Service Accounts Defintion
+   
+        - IN PROGRESS
+
     
