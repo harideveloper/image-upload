@@ -107,6 +107,23 @@ Application high level components
     
    Image Database — ( Google SQL / MySQL)
    
+   
+    - Table Design
+ 
+	Table Name : IMAGE
+	   Columns: 
+	    id (auto-increment) 
+	    signed-url VARCHAR(512) 
+	    expiration (TIMESTAMP)
+	    userinfo-id VARCHAR(2) 
+	    update-time-stamp (TIMESTAMP)
+
+	Table Name : USERINFO
+	   Columns : 
+	    id (auto-increment) 
+            email-id : VARCHAR(255)
+            update-time-stamp (TIMESTAMP)
+	    
     - Service Accounts
     - Cloud Storage
     - Terraform Project
