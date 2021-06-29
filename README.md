@@ -1,31 +1,16 @@
 # image-upload
 
 
-Assmuptions (Functional)
+Assmuptions 
 
-    * Regional scope and customer from only within UK accessing the application
-    * Application to be available 24 * 7 ( Uptime 100% )
-    * Resource Capacity / Capability - Moderate
+<img width="899" alt="1_Assumptions" src="https://user-images.githubusercontent.com/25478952/123878412-ea761280-d936-11eb-81d3-646a34d46f49.png">
 
-Assumptions (Technical)
-
-    * Application is stateless
-    * Vendor dependent solution 
-    * Moderate Portability efforts 
-    * 3 Environments  Staging Testing Environment, Performance Testing Environment (pre-prod) and Production Environment
-    * Production Environment 
-      * 10000 Requests for Month (Roughly)
-      * Average concurrent users 20 (Roughly)
-    * NFT Environment (Same as prod)
-      * 10000 Requests for Month (Roughly)
-      * Average concurrent users 20 (Roughly)
-    * Staging Environment 
-      * 2500 Requests for Month (Roughly)
-      * Average concurrent users 5 (Roughly)
 
 
 
 Application Technical Stack
+
+
 
       Front End : React JS
       Backend : Node JS, Express JS 
@@ -34,31 +19,36 @@ Application Technical Stack
       Containerisation : Docker
       LoadTest Application : python/kubernetes
       
+        
       
 <img width="991" alt="Application-Design" src="https://user-images.githubusercontent.com/25478952/123872760-6e2b0180-d92d-11eb-8cce-4c7569334d84.png">
       
-Application Design & GCP Design
+
+
+Application Overview
 
     * Application is three tiered architecture with web requests served by react js frontend application. 
     * User authentication is verified by Google IAP Platform with Google Sign-in
-    * Backend Node JS Microservice receiving image upload and view images requests
-    * Google Storage Buckets to upload the Images
-    * MySQL database to update the signed URLs , IAP User Token 
+    * Backend Node JS Microservice recives image upload and view images requests
+    * Google Storage Buckets to upload the images
+    * MySQL database to update the signed URLs
     * Terraform Project to create environment resources
     * CI/CD Triggers - Cloud Build
     * Application code hosted in GitHUB repository 
   
-  
-  GCP Design & Solution
-  
-	  * Front End : React JS —> Cloud Run
-	  * Backend : Node JS, Express JS  —> Cloud Run
-	  * Database : MySQL  —> Google SQL MySQL
-	  * Storage —> Google Storage Buckets 
-	  * LoadTest Application : —> GKE
-	  * Logs & Monitoring —> Cloud Logging & Cloud Monitoring
-    
- Design Considerations (Cloud Run & GKE)
+
+
+
+
+High Level GCP Design
+
+<img width="1056" alt="3_GCP-Design-High-Level" src="https://user-images.githubusercontent.com/25478952/123877936-0c22ca00-d936-11eb-94e6-3f971fe2d1f9.png">
+
+
+
+
+
+Design Considerations (Cloud Run & GKE)
 
     * Cost                                    ( Cloud Run >> GKE )
     * Administration Efforts	                ( Cloud Run >> GKE )
@@ -69,7 +59,40 @@ Application Design & GCP Design
     * Portability/Migration/Vendor Dependent  ( GKE >> Cloud Run )
     * Test vs Prod                            ( GKE >> Cloud Run )
 
+
+
+
+
+Detailed GCP Cluster
   
+<img width="1008" alt="Image-Cluster-AD" src="https://user-images.githubusercontent.com/25478952/123874817-a08a2e00-d930-11eb-9a10-a7559c039ff1.png">
+
+
+Load Balancer Design
+
+
+<img width="797" alt="6_Image-Load Balancer-AD" src="https://user-images.githubusercontent.com/25478952/123878967-fa422680-d937-11eb-8c2a-0ab027a4474e.png">
+
+
+
+Detailed E2E GCP Design
+
+<img width="1421" alt="5_Image-E2E-AD" src="https://user-images.githubusercontent.com/25478952/123878609-4d67a980-d937-11eb-9e43-54a6d8089095.png">
+
+
+
+Detailed CI/CD Design
+
+<img width="787" alt="7_Image-gitOps" src="https://user-images.githubusercontent.com/25478952/123878698-8273fc00-d937-11eb-90ec-c45e42a54962.png">
+
+
+
+Locust App Design
+
+<img width="810" alt="8_Image-Locust-Cluster-AD" src="https://user-images.githubusercontent.com/25478952/123879188-70468d80-d938-11eb-8075-e44f4a20f50c.png">
+
+
+
 Application high level components
 
   Image UI  — ( React JS / Cloud Run )
@@ -245,4 +268,18 @@ Application high level components
    
         - IN PROGRESS
 
+Environment Sizing (Technical)
+
+    * Production Environment 
+      * 10000 Requests for Month (Roughly)
+      * Average concurrent users 50 (Roughly)
+    * NFT Environment (Same as prod)
+      * 10000 Requests for Month (Roughly)
+      * Average concurrent users 50 (Roughly)
+    * Staging Environment 
+      * 2500 Requests for Month (Roughly)
+      * Average concurrent users 5 (Roughly)
+      
+      
+      
     
