@@ -194,6 +194,10 @@ Application high level components
     - Cost - MYSQL / Firestore (204 / Month)
     
  IAM Policy
+ 
+ 
+ <img width="998" alt="9_IAM-Policy" src="https://user-images.githubusercontent.com/25478952/123883005-eac6db80-d93f-11eb-8dcd-36c058865e51.png">
+
    
    Below service account and IAM policies to be applied for each resoource giving them least priviledge. Please find below high level role definition on each 	  resources, service accounts and IAM Roles. 
     
