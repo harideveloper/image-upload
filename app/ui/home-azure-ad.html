@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Upload</title>
+  <script src="https://alcdn.msauth.net/browser/2.20.0/js/msal-browser.min.js"></script>
+</head>
+<body>
+  <h1>File Upload Utility</h1>
+
+  <!-- Microsoft Login Button -->
+  <button id="loginButton">Login with Microsoft</button>
+
+  <br><br>
+
+  <!-- File Upload Section -->
+  <input type="file" id="fileInput" />
+  <button id="uploadButton" disabled>Upload</button>
+  <p id="status"></p>
+
+  <script>
+    // Set up MSAL (Microsoft Authentication Library)
+    const msalConfig = {
+      auth: {
+        clientId: "YOUR-CLIENT-ID", // Replace with your Azure AD app's Client ID
+        authority: "https://login.microsoftonline.com/YOUR-TENANT-ID", // Replace with your Tenant ID
+        redirectUri: "http://localhost:3000", // Your redirect URI
+      },
+      cache: {
+        cacheLocation: "sessionStorage",
+        storeAuthStateInCookie: true,
+      },
+    };
+
+    const msalInstance = new msal.PublicClientApplication(msalConfig);
+
+    // Handle login
+    document.getElementById("loginButton").addEventListener("click", () => {
+      const loginRequest = {
+        scopes: ["User.Read"], // You can add more scopes depending on your needs
+      };
+
+      msalInstance.loginPopup(loginRequest)
+        .then(response => {
+          console.log("Logged in successfully", response);
+          document.getElementById("uploadButton").disabled = false; // Enable the upload button
+          // Optionally, save the ID token or access token
+          sessionStorage.setItem("accessToken", response.accessToken);
+          setStatus("You are logged in!", true);
+        })
+        .catch(error => {
+          console.error("Login error", error);
+          setStatus("Login failed: " + error.message);
+        });
+    });
+
+    // Helper function to set status messages
+    const setStatus = (message, isSuccess = false) => {
+      const status = document.getElementById("status");
+      status.textContent = message;
+      status.className = isSuccess ? "success" : "error";
+    };
+
+    // Event listener for the upload button
+    document.getElementById("uploadButton").addEventListener("click", async () => {
+      const fileInput = document.getElementById("fileInput");
+      if (!fileInput.files.length) {
+        setStatus("Please select a file");
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const fileName = file.name;
+      const contentType = file.type || "application/octet-stream";
+
+      // Get the access token from sessionStorage
+      const accessToken = sessionStorage.getItem("accessToken");
+      if (!accessToken) {
+        setStatus("Please login first.");
+        return;
+      }
+
+      try {
+        setStatus("Requesting signed URL...");
+
+        // Step 1: Request a signed URL from the backend
+        const response = await fetch("http://localhost:3001/generateSignedUrl", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`, // Include the access token in the request
+          },
+          body: JSON.stringify({ fileName, contentType }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to get signed URL");
+        }
+
+        const { signedUrl } = await response.json();
+
+        // Step 2: Upload the file directly to the signed URL
+        setStatus("Uploading file...");
+        const uploadResponse = await fetch(signedUrl, {
+          method: "PUT",
+          headers: { "Content-Type": contentType },
+          body: file,
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error("Failed to upload file");
+        }
+
+        setStatus("File uploaded successfully!", true);
+      } catch (error) {
+        console.error(error);
+        setStatus("Error: " + error.message);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Upload with IAP Authentication</title>
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
+</head>
+<body>
+  <h1>File Upload Utility</h1>
+
+  <!-- Google Login Button -->
+  <div class="g-signin2" data-onsuccess="onSignIn"></div>
+
+  <br><br>
+
+  <!-- File Upload Section -->
+  <input type="file" id="fileInput" disabled />
+  <button id="uploadButton" disabled>Upload</button>
+  <p id="status"></p>
+
+  <script>
+    // Initialize Google OAuth client for IAP
+    function onSignIn(googleUser) {
+      const profile = googleUser.getBasicProfile();
+      console.log("Logged in as: " + profile.getName());
+
+      // Get the ID token which we will use to authorize the user with IAP
+      const id_token = googleUser.getAuthResponse().id_token;
+
+      // Set status and enable the upload button
+      setStatus("You are logged in!", true);
+      document.getElementById("uploadButton").disabled = false;
+
+      // You may store the ID token to use in your API requests later
+      sessionStorage.setItem("id_token", id_token);
+    }
+
+    // Helper function to set status messages
+    function setStatus(message, isSuccess = false) {
+      const status = document.getElementById("status");
+      status.textContent = message;
+      status.className = isSuccess ? "success" : "error";
+    }
+
+    // Event listener for the upload button
+    document.getElementById("uploadButton").addEventListener("click", async () => {
+      const fileInput = document.getElementById("fileInput");
+      if (!fileInput.files.length) {
+        setStatus("Please select a file");
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const fileName = file.name;
+      const contentType = file.type || "application/octet-stream";
+
+      // Get the ID token from sessionStorage
+      const idToken = sessionStorage.getItem("id_token");
+      if (!idToken) {
+        setStatus("Please login first.");
+        return;
+      }
+
+      try {
+        setStatus("Requesting signed URL...");
+
+        // Step 1: Request a signed URL from the backend
+        const response = await fetch("http://localhost:3001/generateSignedUrl", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${idToken}`,  // Include the ID token in the request to verify IAP authentication
+          },
+          body: JSON.stringify({ fileName, contentType }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to get signed URL");
+        }
+
+        const { signedUrl } = await response.json();
+
+        // Step 2: Upload the file directly to the signed URL
+        setStatus("Uploading file...");
+        const uploadResponse = await fetch(signedUrl, {
+          method: "PUT",
+          headers: { "Content-Type": contentType },
+          body: file,
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error("Failed to upload file");
+        }
+
+        setStatus("File uploaded successfully!", true);
+      } catch (error) {
+        console.error(error);
+        setStatus("Error: " + error.message);
+      }
+    });
+  </script>
+</body>
+</html>

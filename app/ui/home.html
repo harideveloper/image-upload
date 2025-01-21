@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Upload</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    #status {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    #status.success {
+      color: green;
+    }
+    #status.error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <h1>File Upload Utility</h1>
+  <input type="file" id="fileInput" />
+  <button id="uploadButton">Upload</button>
+  <p id="status"></p>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const fileInput = document.getElementById('fileInput');
+      const uploadButton = document.getElementById('uploadButton');
+      const status = document.getElementById('status');
+
+      // Helper function to set status messages
+      const setStatus = (message, isSuccess = false) => {
+        status.textContent = message;
+        status.className = isSuccess ? 'success' : 'error';
+      };
+
+      // Event listener for the upload button
+      uploadButton.addEventListener('click', async () => {
+        // Validate file input
+        if (!fileInput.files.length) {
+          setStatus('Please select a file');
+          return;
+        }
+
+        const file = fileInput.files[0];
+        const fileName = file.name;
+        const contentType = file.type || 'application/octet-stream';
+
+        try {
+          setStatus('Requesting signed URL...');
+
+          // Step 1: Request a signed URL from the backend
+          const response = await fetch('http://localhost:3001/generateSignedUrl', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fileName, contentType }),
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to get signed URL');
+          }
+
+          const { signedUrl } = await response.json();
+          console.log("Generated Signed URL :"+signedUrl)
+
+          // Step 2: Upload the file directly to the signed URL
+          setStatus('Uploading file...');
+          const uploadResponse = await fetch(signedUrl, {
+            method: 'PUT',
+            headers: { 'Content-Type': contentType },
+            body: file,
+          });
+
+          console.log("Upload response :"+uploadResponse)
+
+          if (!uploadResponse.ok) {
+            throw new Error('Failed to upload file');
+          }
+
+          setStatus('File uploaded successfully!', true);
+        } catch (error) {
+          console.error(error);
+          setStatus(`Error: ${error.message}`);
+        }
+      });
+    });
+  </script>
+</body>
+</html> 
+
