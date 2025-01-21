@@ -287,3 +287,11 @@ Environment Sizing (Technical)
       
       
     
+curl -m 130 -X POST "https://europe-west2-rag-accelerator-dev-e694.cloudfunctions.net/signedurlservice" \
+-H "Authorization: Bearer $(gcloud auth print-identity-token)" \
+-H "api-key: testkey12345" \ 
+-H "Content-Type: application/json" \
+-d '{
+  "fileName": "test.txt",
+  "contentType": "text/plain"
+}'

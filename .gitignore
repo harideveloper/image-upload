@@ -1,0 +1,68 @@
+# Terraform
+*.tfstate
+*.tfstate.*
+.crash
+*.tfvars
+*.tfvars.json
+.terraform/
+.terraform.lock.hcl
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+# For security: Uncomment if sensitive info might be accidentally added
+# *.pem
+# *.key
+# *.env
+
+*.zip
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+/dist/
+/coverage/
+.vscode/
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.DS_Store
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.env
+*.venv/
+*.egg-info/
+dist/
+build/
+.eggs/
+*.log
+*.pytest_cache/
+.tox/
+.mypy_cache/
+.pytest_cache/
+.idea/
+
+# General editor files
+*.swp
+*.swo
+*.swn
+*.bak
+*~.nib
+
+# IDEs
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS-specific
+.DS_Store
+Thumbs.db

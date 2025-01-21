@@ -4,36 +4,61 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>File Upload with IAP Authentication</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    #status {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    #status.success {
+      color: green;
+    }
+    #status.error {
+      color: red;
+    }
+    .g-signin2 {
+      margin-bottom: 20px;
+    }
+    #uploadSection {
+      display: none;
+    }
+  </style>
   <script src="https://apis.google.com/js/platform.js" async defer></script>
 </head>
 <body>
-  <h1>File Upload Utility</h1>
+  <h1>File Upload with IAP Authentication</h1>
 
   <!-- Google Login Button -->
   <div class="g-signin2" data-onsuccess="onSignIn"></div>
 
-  <br><br>
-
   <!-- File Upload Section -->
-  <input type="file" id="fileInput" disabled />
-  <button id="uploadButton" disabled>Upload</button>
+  <div id="uploadSection">
+    <input type="file" id="fileInput" />
+    <button id="uploadButton">Upload</button>
+  </div>
   <p id="status"></p>
 
   <script>
-    // Initialize Google OAuth client for IAP
+    // Function called upon successful sign-in
     function onSignIn(googleUser) {
       const profile = googleUser.getBasicProfile();
       console.log("Logged in as: " + profile.getName());
 
-      // Get the ID token which we will use to authorize the user with IAP
-      const id_token = googleUser.getAuthResponse().id_token;
+      // Get the ID token from Google sign-in
+      const idToken = googleUser.getAuthResponse().id_token;
 
-      // Set status and enable the upload button
-      setStatus("You are logged in!", true);
-      document.getElementById("uploadButton").disabled = false;
+      // Store the ID token for later use in API requests
+      sessionStorage.setItem("id_token", idToken);
 
-      // You may store the ID token to use in your API requests later
-      sessionStorage.setItem("id_token", id_token);
+      // Display the upload section and set status
+      document.getElementById("uploadSection").style.display = "block";
+      setStatus("You are logged in! You can now upload files.", true);
     }
 
     // Helper function to set status messages
@@ -46,8 +71,9 @@
     // Event listener for the upload button
     document.getElementById("uploadButton").addEventListener("click", async () => {
       const fileInput = document.getElementById("fileInput");
+
       if (!fileInput.files.length) {
-        setStatus("Please select a file");
+        setStatus("Please select a file.");
         return;
       }
 
@@ -58,7 +84,7 @@
       // Get the ID token from sessionStorage
       const idToken = sessionStorage.getItem("id_token");
       if (!idToken) {
-        setStatus("Please login first.");
+        setStatus("Please log in first.");
         return;
       }
 
@@ -66,20 +92,21 @@
         setStatus("Requesting signed URL...");
 
         // Step 1: Request a signed URL from the backend
-        const response = await fetch("http://localhost:3001/generateSignedUrl", {
+        const response = await fetch("https://europe-west2-rag-accelerator-dev-e694.cloudfunctions.net/signedurlservice", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${idToken}`,  // Include the ID token in the request to verify IAP authentication
+            "Authorization": `Bearer ${idToken}`, // Add IAP authentication token
           },
           body: JSON.stringify({ fileName, contentType }),
         });
 
         if (!response.ok) {
-          throw new Error("Failed to get signed URL");
+          throw new Error("Failed to get signed URL.");
         }
 
         const { signedUrl } = await response.json();
+        console.log("Generated Signed URL:", signedUrl);
 
         // Step 2: Upload the file directly to the signed URL
         setStatus("Uploading file...");
@@ -90,13 +117,13 @@
         });
 
         if (!uploadResponse.ok) {
-          throw new Error("Failed to upload file");
+          throw new Error("Failed to upload file.");
         }
 
         setStatus("File uploaded successfully!", true);
       } catch (error) {
         console.error(error);
-        setStatus("Error: " + error.message);
+        setStatus(`Error: ${error.message}`);
       }
     });
   </script>

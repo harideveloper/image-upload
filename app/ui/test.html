@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GCP IAP Login</title>
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
+  <meta name="google-signin-client_id" content="YOUR_CLIENT_ID.apps.googleusercontent.com">
+</head>
+<body>
+  <h1>GCP IAP Login</h1>
+  <div class="g-signin2" data-onsuccess="onSignIn"></div>
+  <p id="status"></p>
+
+  <script>
+    function onSignIn(googleUser) {
+      const profile = googleUser.getBasicProfile();
+      console.log("Name: " + profile.getName());
+      console.log("Email: " + profile.getEmail());
+
+      const idToken = googleUser.getAuthResponse().id_token;
+      console.log("ID Token: " + idToken);
+
+      // Display a success message
+      document.getElementById("status").innerText = "Login successful: " + profile.getEmail();
+    }
+  </script>
+</body>
+</html>
