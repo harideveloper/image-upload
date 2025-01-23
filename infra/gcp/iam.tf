@@ -46,6 +46,12 @@ resource "google_storage_bucket_iam_member" "execution_sa_src_access" {
   member = "serviceAccount:${google_service_account.cf_execution_sa.email}"
 }
 
+resource "google_storage_bucket_iam_member" "execution_sa_staging_access" {
+  bucket = google_storage_bucket.staging.name
+  role   = "roles/storage.objectCreator"
+  member = "serviceAccount:${google_service_account.cf_execution_sa.email}"
+}
+
 resource "google_project_iam_member" "cloud_function_token_creator" {
   project = var.project_id
   role    = "roles/iam.serviceAccountTokenCreator"

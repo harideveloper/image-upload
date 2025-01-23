@@ -11,13 +11,13 @@ data "archive_file" "build_archive" {
   output_path = "${path.module}/function.zip"
 }
 
-resource "google_cloudfunctions2_function" "signed_url_service" {
-  name     = "signedurlservice"
+resource "google_cloudfunctions2_function" "file_upload" {
+  name     = "file-upload"
   location = var.region
 
   build_config {
     runtime         = "nodejs22"
-    entry_point     = "generateSignedUrl"
+    entry_point     = "uploadFile"
     service_account = google_service_account.cf_build_sa.name
     source {
       storage_source {
@@ -33,9 +33,6 @@ resource "google_cloudfunctions2_function" "signed_url_service" {
     environment_variables = {
       BUCKET_NAME    = google_storage_bucket.staging.name
       EXPIRATION_MIN = var.expiration_minutes
-      SERVICE        = "signedurlservice"
-      REGION         = var.region
-      API_KEY        = "testkey12345"
     }
     service_account_email = google_service_account.cf_execution_sa.email
   }
@@ -52,12 +49,14 @@ resource "google_storage_bucket_object" "build_archive" {
   content_type = "application/zip"
 }
 
-## Only for development purpose
-resource "google_cloudfunctions2_function_iam_member" "public_invoker" {
-  project        = google_cloudfunctions2_function.signed_url_service.project
-  location       = google_cloudfunctions2_function.signed_url_service.location
-  cloud_function = google_cloudfunctions2_function.signed_url_service.name
-  role           = "roles/cloudfunctions.invoker"
-  member         = "allUsers"
+resource "google_cloud_run_service_iam_binding" "binding" {
+  location = google_cloudfunctions2_function.file_upload.location
+  project = google_cloudfunctions2_function.file_upload.project
+  service = google_cloudfunctions2_function.file_upload.name
+  role = "roles/run.invoker"
+  members = [
+    "allUsers",
+  ]
 }
+
 
