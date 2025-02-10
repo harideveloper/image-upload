@@ -1,0 +1,129 @@
+{
+    "displayName": "File_Accessor_Dashboard",
+    "mosaicLayout": {
+      "columns": 48,
+      "tiles": [
+        {
+          "width": 24,
+          "height": 16,
+          "widget": {
+            "xyChart": {
+              "dataSets": [
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"logging.googleapis.com/user/clean_files\" resource.type=\"cloud_run_revision\"",
+                      "aggregation": {
+                        "perSeriesAligner": "ALIGN_RATE",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": []
+                      },
+                      "pickTimeSeriesFilter": {
+                        "rankingMethod": "METHOD_MEAN",
+                        "numTimeSeries": 30,
+                        "direction": "TOP"
+                      }
+                    }
+                  },
+                  "plotType": "STACKED_AREA",
+                  "targetAxis": "Y1",
+                  "minAlignmentPeriod": "60s"
+                },
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"logging.googleapis.com/user/file_download_requests\" resource.type=\"cloud_run_revision\"",
+                      "aggregation": {
+                        "perSeriesAligner": "ALIGN_RATE",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": []
+                      },
+                      "pickTimeSeriesFilter": {
+                        "rankingMethod": "METHOD_MEAN",
+                        "numTimeSeries": 30,
+                        "direction": "TOP"
+                      }
+                    }
+                  },
+                  "plotType": "STACKED_AREA",
+                  "targetAxis": "Y1",
+                  "minAlignmentPeriod": "60s"
+                },
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"logging.googleapis.com/user/file_upload_requests\" resource.type=\"cloud_run_revision\"",
+                      "aggregation": {
+                        "perSeriesAligner": "ALIGN_RATE",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": []
+                      },
+                      "pickTimeSeriesFilter": {
+                        "rankingMethod": "METHOD_MEAN",
+                        "numTimeSeries": 30,
+                        "direction": "TOP"
+                      }
+                    }
+                  },
+                  "plotType": "STACKED_AREA",
+                  "targetAxis": "Y1",
+                  "minAlignmentPeriod": "60s"
+                },
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"logging.googleapis.com/user/files_processed\" resource.type=\"cloud_run_revision\"",
+                      "aggregation": {
+                        "perSeriesAligner": "ALIGN_RATE",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": []
+                      },
+                      "pickTimeSeriesFilter": {
+                        "rankingMethod": "METHOD_MEAN",
+                        "numTimeSeries": 30,
+                        "direction": "TOP"
+                      }
+                    }
+                  },
+                  "plotType": "STACKED_AREA",
+                  "targetAxis": "Y1",
+                  "minAlignmentPeriod": "60s"
+                },
+                {
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "filter": "metric.type=\"logging.googleapis.com/user/quarantined_files\" resource.type=\"cloud_run_revision\"",
+                      "aggregation": {
+                        "perSeriesAligner": "ALIGN_RATE",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": []
+                      },
+                      "pickTimeSeriesFilter": {
+                        "rankingMethod": "METHOD_MEAN",
+                        "numTimeSeries": 30,
+                        "direction": "TOP"
+                      }
+                    }
+                  },
+                  "plotType": "STACKED_AREA",
+                  "targetAxis": "Y1",
+                  "minAlignmentPeriod": "60s"
+                }
+              ],
+              "chartOptions": {
+                "mode": "COLOR",
+                "displayHorizontal": false
+              },
+              "thresholds": [],
+              "yAxis": {
+                "scale": "LINEAR"
+              }
+            },
+            "title": "Total"
+          }
+        }
+      ]
+    },
+    "dashboardFilters": [],
+    "labels": {}
+  }
