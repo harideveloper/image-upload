@@ -13,3 +13,14 @@ variable "expiration_minutes" {
   default     = 15
   description = "The expiration time in minutes for the signed URL."
 }
+
+variable "application" {
+  description = "Application Name"
+  type        = string
+  default     = "authtest"
+}
+
+variable "project_number" {
+  description = "Google cloud project number of project"
+  type        = string
+}

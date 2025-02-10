@@ -1,0 +1,6 @@
+This is a file with only basic information.
+
+Name: Hari
+Age: 30
+Occupation: Software Engineer
+Country: UK

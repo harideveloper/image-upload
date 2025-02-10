@@ -1,33 +1,6 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>File Upload Capability</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <header>File Upload Capability</header>
-  <main>
-    <h1>File Upload Portal</h1>
-    <p class="description">This tool allows you to securely upload files to the cloud using signed URLs. Simply select a file below and click "Upload File" to store it safely. You can also check the health of the cloud function using the "Health Check" button.</p>
-    <input type="file" id="fileInput" />
-    <div class="button-container">
-      <button onclick="fileUpload()">Upload File</button>
-      <button onclick="healthCheck()">Health Check</button>
-    </div>
-    <pre id="result"></pre>
-  </main>
-  <footer>
-    &copy; All rights reserved
-  </footer>
-  <script src="script.js"></script>
-</body>
-</html> -->
-
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -42,7 +15,7 @@
     }
 
     header {
-      background-color: #006064;
+      background-color: #08804d;
       color: white;
       padding: 15px;
       text-align: center;
@@ -63,7 +36,7 @@
     h1 {
       font-size: 22px;
       margin-bottom: 20px;
-      color: #004d40;
+      color: #174d00;
       text-align: center;
     }
 
@@ -77,7 +50,7 @@
 
     button {
       padding: 6px 12px;
-      background: #00796b;
+      background: #08804d;
       color: white;
       border: none;
       border-radius: 5px;
@@ -92,12 +65,48 @@
       transform: translateY(-2px);
     }
 
+    .desc {
+      margin-top: 20px;
+      padding: 20px;
+      background: #f0f8f0;
+      border-radius: 5px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      font-size: 14px;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .desc ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .desc li {
+      padding: 5px 0;
+    }
+
+    .desc a {
+      text-decoration: none;
+      color: #00796b;
+      font-weight: bold;
+    }
+
+    .desc a:hover {
+      text-decoration: underline;
+      color: #004d40;
+    }
+
+    .desc-healthcheck {
+      color: #006064;
+      font-weight: bold;
+    }
+
     input[type="file"] {
       display: block;
       margin: 15px auto;
       padding: 10px;
       font-size: 14px;
-      border: 1px solid #ddd;
+      border: 2px solid #aac49e;
       border-radius: 5px;
       width: 100%;
       box-sizing: border-box;
@@ -113,7 +122,8 @@
       font-family: serif;
       font-size: 13px;
       color: #0c2502;
-      display: none; /* hide results section on page load */
+      display: none;
+      /* hide results section on page load */
     }
 
     footer {
@@ -130,64 +140,267 @@
       gap: 10px;
       margin-top: 10px;
     }
+
+    .result {
+      /* display : none; */
+      margin-top: 20px;
+      padding: 20px;
+      background: #f0f8f0;
+      border-radius: 5px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      font-size: 14px;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .result ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .result li {
+      padding: 5px 0;
+    }
+
+    .result a {
+      text-decoration: none;
+      color: #00796b;
+      font-weight: bold;
+    }
+
+    .result a:hover {
+      text-decoration: underline;
+      color: #004d40;
+    }
+
+    .result-healthcheck {
+      color: #006064;
+      font-weight: bold;
+    }
+
+    .result-upload {
+      color: #00796b;
+      font-weight: bold;
+    }
+
+    .result-list-header {
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .file-upload-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .file-name {
+      flex: 2;
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .progress-bar {
+      flex: 3;
+      height: 8px;
+      border-radius: 4px;
+      transition: width 0.4s ease-in-out;
+    }
+
+    .upload-status {
+      flex: 1;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .success {
+      color: #388e3c;
+    }
+
+    .error {
+      color: #d32f2f;
+    }
   </style>
 </head>
+
 <body>
-  <header>File Upload Capability</header>
+  <header>File Accessor Capability</header>
   <main>
-    <h1>File Upload Portal</h1>
-    <p class="description">This tool allows you to securely upload files to the cloud using signed URLs. Simply select a file below and click "Upload File" to store it safely. You can also check the health of the cloud function using the "Health Check" button.</p>
-    <input type="file" id="fileInput" />
-    <div class="button-container">
-      <button onclick="fileUpload()">Upload File</button>
-      <button onclick="healthCheck()">Health Check</button>
+    <h1>File Accessor Portal</h1>
+    <div class="desc" id="description">
+      <p class="description">
+      <h4>Please be aware that this tool is intended for secure file management. Please ensure you follow the guidelines
+        below to ensure compliance and avoid uploading sensitive or confidential information</h4>
+      <ul>
+        <li><strong>❌ Do not upload sensitive personal data</strong>, such as credit card numbers, personal
+          identification details, or confidential business documents, unless explicitly authorized to do so.</li>
+        <li><strong>✅ Ensure compliance</strong> with relevant data protection regulations when uploading files.</li>
+        <li><strong>❌ Do not upload PII data </strong> to check for any potential personal or confidential information
+          before uploading.</li>
+        <li><strong>✅ Review your files carefully</strong> to make sure they do not violate any privacy or security
+          policies.</li>
+      </ul>
+      By using this tool, you agree to comply with the security measures and data protection rules in place. For more
+      information on compliance and best practices, please refer to our terms of service.
+      </p>
     </div>
-    <pre id="result"></pre>
+    <input type="file" id="fileInput" multiple />
+    <div class="button-container">
+      <button onclick="fileUpload()">Upload Files</button>
+      <button onclick="healthCheck()">Health Check</button>
+      <button onclick="listAll()">View Files</button>
+
+    </div>
+    <div class="result" id="result"></div>
   </main>
   <footer>
     &copy; All rights reserved
   </footer>
   <script>
-    const api = "https://europe-west2-rag-accelerator-dev-e694.cloudfunctions.net/file-upload"; 
+    const api = "https://europe-west2-dev2-ea8f.cloudfunctions.net/file-accessor";
 
-    // Performs backend API health check
-    async function healthCheck() {
+    // generate correlation id
+    function generateUniqueCorrelationId() {
+      return 'correl-id-' + Math.random().toString(36).substr(2, 9);
+    }
+
+    // display results
+    function displayResult(message, isError = false) {
       const resultElement = document.getElementById("result");
       resultElement.style.display = "block";
-      resultElement.textContent = "Loading...";
+      resultElement.innerHTML = message;
+      if (isError) resultElement.style.color = "red";
+    }
+
+    // view files
+    async function listAll() {
+      const fileListElement = document.getElementById("result");
+      fileListElement.innerHTML = "Loading...";
 
       try {
-        const response = await fetch(api, { method: "GET" });
+        const response = await fetch(`${api}/listAll`);
         const data = await response.json();
-        resultElement.textContent = `Health Check: ${data.message} Timestamp: ${data.timestamp}`;
+
+        if (!data.files || data.files.length === 0) {
+          displayResult("No files available.");
+          return;
+        }
+
+        const fileLinks = data.files.map(file => `<li><a href="#" onclick="fileDownload('${file}')">${file}</a></li>`).join("");
+        fileListElement.innerHTML = `<div class="result-list-header">Available Files:</div><ul>${fileLinks}</ul>`;
       } catch (error) {
-        console.error("Error:", error);
-        resultElement.textContent = `Error: ${error.message}`;
+        displayResult(`Error loading files: ${error.message}`, true);
       }
     }
 
-    // Upload file function to upload files
+    // healthcheck
+    async function healthCheck() {
+      displayResult("Loading...");
+      try {
+        const response = await fetch(`${api}/health`);
+        const data = await response.json();
+
+        const healthMessage = `<span class="result-healthcheck">Status: ${data.message} | Timestamp: ${data.timestamp}</span>`;
+
+        displayResult(healthMessage);
+      } catch (error) {
+        displayResult(`Unable to perform healthcheck: ${error.message}`, true);
+      }
+    }
+
+    // file download
+    async function fileDownload(fileName) {
+      displayResult("Fetching download link...");
+      try {
+        const response = await fetch(`${api}/download`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ filename: fileName })
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to obtain signed URL for download");
+        }
+
+        const { signedUrl } = await response.json();
+        const fileResponse = await fetch(signedUrl, { method: "GET", headers: { "Content-Type": "application/octet-stream" } });
+
+        if (fileResponse.ok) {
+          const blob = await fileResponse.blob();
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = fileName;
+          link.click();
+
+          const fileDownloadCompletionMsg = `<span class="result-healthcheck">File "${fileName}" downloaded successfully.</span>`;
+          displayResult(fileDownloadCompletionMsg)
+        } else {
+          throw new Error("Failed to download file from signed URL");
+        }
+      } catch (error) {
+        displayResult(`Unable to download file: ${error.message}`, true);
+      }
+    }
+
+    // multiple file uploads
     async function fileUpload() {
       const fileInput = document.getElementById("fileInput");
       const resultElement = document.getElementById("result");
-      const file = fileInput.files[0];
+      const files = fileInput.files;
 
-      if (!file) {
-        alert("Please select a file to upload.");
+      if (files.length === 0) {
+        alert("Please select files to upload.");
         return;
       }
 
-      resultElement.style.display = "block";
-      resultElement.textContent = "Uploading...";
+      resultElement.innerHTML = `<div class="result-list-header">Uploading ${files.length} file(s)...</div>`;
+      for (const file of files) {
+        const correlationId = generateUniqueCorrelationId();
+        console.log(`correlationId for ${file.name}: ${correlationId}`); 
+        
 
+        const fileId = `progress-${file.name.replace(/\s+/g, "-")}`; 
+        const statusId = `status-${file.name.replace(/\s+/g, "-")}`;
+
+        // const modifiedFileName = `${correlationId}_${file.name}`;
+        // const fileId = `progress-${modifiedFileName.replace(/\s+/g, "-")}`;
+        // const statusId = `status-${modifiedFileName.replace(/\s+/g, "-")}`;
+
+        resultElement.innerHTML += `
+          <div class="file-upload-row">
+            <span class="file-name">${file.name}</span>
+            <progress id="${fileId}" value="0" max="100" class="progress-bar"></progress>
+            <span id="${statusId}" class="upload-status">⌛ Uploading...</span>
+          </div>
+        `;
+
+        try {
+          await uploadSingleFile(file, file.name, fileId);
+          document.getElementById(fileId).style.display = "none"; 
+          document.getElementById(statusId).innerHTML = `<span class="success">✅ Uploaded</span>`;
+        } catch (error) {
+          document.getElementById(fileId).style.display = "none"; 
+          document.getElementById(statusId).innerHTML = `<span class="error">❌ Failed</span>`;
+        }
+      }
+
+      fileInput.value = "";
+    }
+
+
+    // single file upload
+    async function uploadSingleFile(file, filename, progressId) {
       try {
-        // Generate signed URL
-        const response = await fetch(api, {
+        // get signed url
+        const response = await fetch(`${api}/upload`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ filename: file.name }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ filename: filename }),
         });
 
         if (!response.ok) {
@@ -196,26 +409,30 @@
         }
 
         const data = await response.json();
+        const signedUrl = data.signedUrl;
 
-        // Upload the file using generated signed URL
-        const uploadResponse = await fetch(data.signedUrl, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/octet-stream",
-          },
-          body: file,
+        // upload file using generated signed url
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("PUT", signedUrl, true);
+          xhr.setRequestHeader("Content-Type", "application/octet-stream");
+
+          // progres event listener
+          xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+              const percentComplete = Math.round((event.loaded / event.total) * 100);
+              document.getElementById(progressId).value = percentComplete;
+            }
+          };
+          xhr.onload = () => (xhr.status === 200 ? resolve() : reject(new Error("Failed to upload file")));
+          xhr.onerror = () => reject(new Error("Network error during file upload"));
+          xhr.send(file);
         });
-
-        if (uploadResponse.ok) {
-          resultElement.textContent = `File uploaded successfully: ${file.name}`;
-        } else {
-          throw new Error("Failed to upload file");
-        }
       } catch (error) {
-        console.error("Error:", error);
-        resultElement.textContent = `Error: ${error.message}`;
+        throw error;
       }
     }
   </script>
 </body>
+
 </html>

@@ -1,0 +1,5 @@
+Medical Report:
+Patient Name: Hari
+Date of Birth: 01/01/1988
+Medical Record Number: 1234567890
+Diagnosis: Hypertension

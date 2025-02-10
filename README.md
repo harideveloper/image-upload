@@ -295,3 +295,28 @@ curl -m 130 -X POST "https://europe-west2-rag-accelerator-dev-e694.cloudfunction
   "fileName": "test.txt",
   "contentType": "text/plain"
 }'
+
+curl -m 130 -X POST https://europe-west2-rag-accelerator-dev-e694.cloudfunctions.net/signedurlservice \
+-H "Authorization: bearer $(gcloud auth print-identity-token)" \
+-H "Content-Type: application/json" \
+-d '{
+  "filename": "README.md","contentType": "text/plain"
+}'
+
+
+
+gcloud storage sign-url gs://rag-accelerator-dev-e694-staging/README.md --private-key-file=/Users/hariprasad.sundaresan/Desktop/Workspace/Keys/execution-sa.json --http-verb=PUT --duration=10m --headers=content-type=application/octet-stream
+---
+
+curl -X PUT -H "Content-Type: application/octet-stream" -T README.md $SIGNED_URL
+
+
+gcloud storage sign-url gs://rag-accelerator-dev-e694-staging/README.md --impersonate-service-account=execution-sa@my-project.iam.gserviceaccount --http-verb=PUT --duration=10m --headers=content-type=application/octet-stream
+---
+
+gcloud storage sign-url gs://rag-accelerator-dev-e694-webportal/home.html --private-key-file=/Users/hariprasad.sundaresan/Desktop/Workspace/Keys/execution-sa.json --duration=1d 
+
+https://codelabs.developers.google.com/secure-serverless-application-with-identity-aware-proxy#6
+
+
+https://europe-west2-rag-accelerator-dev-e694.cloudfunctions.net/file-upload

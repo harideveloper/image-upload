@@ -1,0 +1,8 @@
+{
+    "name": "serve-html",
+    "version": "1.0.0",
+    "main": "server.js",
+    "dependencies": {
+        "@google-cloud/functions-framework": "^3.0.0"
+    }
+}

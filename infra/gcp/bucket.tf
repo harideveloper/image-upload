@@ -1,8 +1,9 @@
 ## Storage 
-resource "google_storage_bucket" "staging" {
-  name                        = "${var.project_id}-staging"
-  location                    = "EU"
+resource "google_storage_bucket" "landing" {
+  name                        = "${var.project_id}-landing"
+  location                    = var.region
   force_destroy               = true
+  storage_class               = "REGIONAL"
   uniform_bucket_level_access = true
   cors {
     origin          = ["*"]
@@ -12,9 +13,27 @@ resource "google_storage_bucket" "staging" {
   }
 }
 
+
+resource "google_storage_bucket" "clean" {
+  name                        = "${var.project_id}-clean"
+  storage_class               = "REGIONAL"
+  location                    = var.region
+  force_destroy               = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket" "quarantine" {
+  name                        = "${var.project_id}-quarantine"
+  storage_class               = "REGIONAL"
+  location                    = var.region
+  force_destroy               = true
+  uniform_bucket_level_access = true
+}
+
 resource "google_storage_bucket" "webportal" {
-  name                        = "${var.project_id}-webportal"
-  location                    = "EU"
+  name                        = "${var.project_id}-web-portal"
+  storage_class               = "REGIONAL"
+  location                    = var.region
   force_destroy               = true
   uniform_bucket_level_access = true
   website {

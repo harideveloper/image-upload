@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Upload Capability</title>
+  <style>
+    body {
+      font-family: serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #fafafa, #e0f7fa);
+      color: #333;
+    }
+
+    header {
+      background-color: #006064;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    main {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      font-size: 22px;
+      margin-bottom: 20px;
+      color: #004d40;
+      text-align: center;
+    }
+
+    p.description {
+      text-align: center;
+      font-size: 15px;
+      margin-bottom: 20px;
+      color: #444;
+      line-height: 1.6;
+    }
+
+    button {
+      padding: 6px 12px;
+      background: #00796b;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    button:hover {
+      background: #004d40;
+      transform: translateY(-2px);
+    }
+
+    input[type="file"] {
+      display: block;
+      margin: 15px auto;
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    pre {
+      padding: 15px;
+      background-color: #e9f8ee;
+      border: 1px solid #a5e1b2;
+      border-radius: 5px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-family: serif;
+      font-size: 13px;
+      color: #0c2502;
+      display: none; /* hide results section on page load */
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 12px;
+      color: #555;
+      padding: 10px 0;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <header>File Upload Capability</header>
+  <main>
+    <h1>File Upload Portal</h1>
+    <p class="description">This tool allows you to securely upload files to the cloud using signed URLs. Simply select a file below and click "Upload File" to store it safely. You can also check the health of the cloud function using the "Health Check" button.</p>
+    <input type="file" id="fileInput" />
+    <div class="button-container">
+      <button onclick="fileUpload()">Upload File</button>
+      <button onclick="healthCheck()">Health Check</button>
+    </div>
+    <pre id="result"></pre>
+  </main>
+  <footer>
+    &copy; All rights reserved
+  </footer>
+  <script>
+    const api = "https://europe-west2-rag-accelerator-dev-e694.cloudfunctions.net/file-upload"; 
+
+    // Performs backend API health check
+    async function healthCheck() {
+      const resultElement = document.getElementById("result");
+      resultElement.style.display = "block";
+      resultElement.textContent = "Loading...";
+
+      try {
+        const response = await fetch(api, { 
+          method: "GET" ,
+          headers : {
+            "x-api-key" : "AIzaSyDNDGbXWxHRomojMvD6Kcs6d6CvAvl8oq0"
+          }
+
+        });
+        const data = await response.json();
+        resultElement.textContent = `Health Check: ${data.message} Timestamp: ${data.timestamp}`;
+      } catch (error) {
+        console.error("Error:", error);
+        resultElement.textContent = `Error: ${error.message}`;
+      }
+    }
+
+    // Upload file function to upload files
+    async function fileUpload() {
+      const fileInput = document.getElementById("fileInput");
+      const resultElement = document.getElementById("result");
+      const file = fileInput.files[0];
+
+      if (!file) {
+        alert("Please select a file to upload.");
+        return;
+      }
+
+      resultElement.style.display = "block";
+      resultElement.textContent = "Uploading...";
+
+      try {
+        // Generate signed URL
+        const response = await fetch(api, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key" : "AIzaSyDNDGbXWxHRomojMvD6Kcs6d6CvAvl8oq0"
+          },
+          body: JSON.stringify({ filename: file.name }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to generate signed URL");
+        }
+
+        const data = await response.json();
+
+        // Upload the file using generated signed URL
+        const uploadResponse = await fetch(data.signedUrl, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/octet-stream",
+            "x-api-key" : "AIzaSyDNDGbXWxHRomojMvD6Kcs6d6CvAvl8oq0"
+          },
+          body: file,
+        });
+
+        if (uploadResponse.ok) {
+          resultElement.textContent = `File uploaded successfully: ${file.name}`;
+        } else {
+          throw new Error("Failed to upload file");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        resultElement.textContent = `Error: ${error.message}`;
+      }
+    }
+  </script>
+</body>
+</html>

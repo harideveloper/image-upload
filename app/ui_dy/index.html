@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Cloud Function with File Upload</title>
+  <script>
+    const functionUrl = "https://europe-west2-rag-accelerator-dev-e694.cloudfunctions.net/test1"; 
+
+    // Function to call the GET endpoint
+    async function testGet() {
+      try {
+        const response = await fetch(functionUrl, { method: "GET" });
+        const data = await response.json();
+        document.getElementById("result").textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        console.error("Error:", error);
+        document.getElementById("result").textContent = "Error: " + error.message;
+      }
+    }
+
+    // Function to call the POST endpoint for file upload
+    async function uploadFile() {
+      const fileInput = document.getElementById("fileInput");
+      const file = fileInput.files[0];
+
+      if (!file) {
+        alert("Please select a file to upload.");
+        return;
+      }
+
+      try {
+        // Request a signed URL
+        const response = await fetch(functionUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ filename: file.name }),
+        });
+
+        const data = await response.json();
+        console.log("signed url =="+data.signedUrl)
+
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to generate signed URL");
+        }
+
+        // Upload the file to the signed URL
+        const uploadResponse = await fetch(data.signedUrl, {
+          method: "PUT",
+          headers: {
+            // "Content-Type": file.type,
+            "Content-Type": "application/octet-stream",
+          },
+          body: file,
+        });
+
+        if (uploadResponse.ok) {
+          document.getElementById("result").textContent = `File uploaded successfully: ${file.name}`;
+        } else {
+          throw new Error("Failed to upload file");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        document.getElementById("result").textContent = "Error: " + error.message;
+      }
+    }
+  </script>
+</head>
+<body>
+  <h1>Test Cloud Function with File Upload</h1>
+  <button onclick="testGet()">Test GET</button>
+  <input type="file" id="fileInput" />
+  <button onclick="uploadFile()">Upload File</button>
+  <pre id="result">Click a button to test the API</pre>
+</body>
+</html>
