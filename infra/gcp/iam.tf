@@ -47,6 +47,13 @@ resource "google_storage_bucket_iam_member" "file_accessor_landing_object_admin_
   member = "serviceAccount:${google_service_account.file_accessor.email}"
 }
 
+// download files
+resource "google_storage_bucket_iam_member" "file_accessor_clean_object_viewer_permissions" {
+  bucket = google_storage_bucket.clean.name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${google_service_account.file_accessor.email}"
+}
+
 // required to list all files from bucket
 resource "google_storage_bucket_iam_member" "file_accessor_landing_object_viewer_permissions" {
   bucket = google_storage_bucket.landing.name
@@ -60,12 +67,17 @@ resource "google_project_iam_member" "file_accessor_token_creator_permissions" {
   member  = "serviceAccount:${google_service_account.file_accessor.email}"
 }
 
-resource "google_project_iam_member" "cloud_function_sa_artifact_reader" {
+resource "google_project_iam_member" "file_accesor_artifact_reader" {
   project = var.project_id
   role    = "roles/artifactregistry.reader"
   member  = "serviceAccount:${google_service_account.file_accessor.email}"
 }
 
+resource "google_project_iam_member" "file_accessor_sql_client" {
+  project = var.project_id
+  role    = "roles/cloudsql.client"
+  member  = "serviceAccount:${google_service_account.file_accessor.email}"
+}
 
 // file scanning service account
 resource "google_service_account" "scanner" {
@@ -96,6 +108,13 @@ resource "google_project_iam_member" "scanner_event_arc_receiver" {
   role    = "roles/eventarc.eventReceiver"
   member  = "serviceAccount:${google_service_account.scanner.email}"
 }
+
+resource "google_project_iam_member" "scanner_sql_client" {
+  project = var.project_id
+  role    = "roles/cloudsql.client"
+  member  = "serviceAccount:${google_service_account.scanner.email}"
+}
+
 
 resource "google_storage_bucket_iam_member" "scanner_landing_object_admin_permissions" {
   bucket = google_storage_bucket.landing.name

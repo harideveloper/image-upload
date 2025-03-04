@@ -34,19 +34,40 @@ resource "google_cloudfunctions2_function" "file_accessor" {
       }
     }
   }
+
   service_config {
     max_instance_count = 1
     available_memory   = "256M"
     timeout_seconds    = 120
+
     environment_variables = {
-      BUCKET_NAME    = google_storage_bucket.landing.name
+      LANDING_BUCKET = google_storage_bucket.landing.name
+      CLEAN_BUCKET   = google_storage_bucket.clean.name
       EXPIRATION_MIN = var.expiration_minutes
+      DB_USER        = google_sql_user.db_user.name
+      DB_HOST        = google_sql_database_instance.postgres_instance.private_ip_address
+      DB_NAME        = google_sql_database.database.name
+      DB_PASSWORD    = google_sql_user.db_user.password
     }
+
+    vpc_connector = google_vpc_access_connector.connector.id
+    vpc_connector_egress_settings = "ALL_TRAFFIC"
+    # ingress_settings = "ALLOW_INTERNAL_ONLY"
     service_account_email = google_service_account.file_accessor.email
   }
 
-  depends_on = [google_storage_bucket.accessor_src_bucket, google_storage_bucket.landing, google_project_service.apis]
+  depends_on = [
+    google_storage_bucket.accessor_src_bucket, 
+    google_storage_bucket.landing, 
+    google_storage_bucket.clean,
+    google_project_service.apis,
+    google_vpc_access_connector.connector,
+    google_sql_database_instance.postgres_instance, 
+    google_sql_database.database,
+    google_sql_user.db_user
+  ]
 }
+
 
 resource "google_cloud_run_service_iam_binding" "binding" {
   location = google_cloudfunctions2_function.file_accessor.location
@@ -108,7 +129,14 @@ resource "google_cloudfunctions2_function" "file_scanner" {
       DLP_SUBSCRIPTION  = google_pubsub_subscription.dlp_scan_subscription.name
       DLP_ENABLED       = "false"
 
+      DB_USER        = google_sql_user.db_user.name
+      DB_HOST        = google_sql_database_instance.postgres_instance.private_ip_address
+      DB_NAME        = google_sql_database.database.name
+      DB_PASSWORD    = google_sql_user.db_user.password
     }
+    vpc_connector = google_vpc_access_connector.connector.id
+    vpc_connector_egress_settings = "ALL_TRAFFIC"
+    # ingress_settings = "ALLOW_INTERNAL_ONLY"
     service_account_email = google_service_account.scanner.email
   }
 
@@ -128,7 +156,11 @@ resource "google_cloudfunctions2_function" "file_scanner" {
     google_storage_bucket.clean,
     google_storage_bucket.quarantine,
     google_project_service.apis,
-    google_service_account.scanner
+    google_service_account.scanner,
+    google_vpc_access_connector.connector,
+    google_sql_database_instance.postgres_instance, 
+    google_sql_database.database,
+    google_sql_user.db_user
   ]
 }
 

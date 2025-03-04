@@ -1,15 +1,5 @@
-{
-  "name": "file-accessor",
-  "version": "2.0.0",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
-  },
-  "dependencies": {
-    "@google-cloud/storage": "^7.15.0",
-    "@google-cloud/logging": "^11.2.0",
-    "@google-cloud/functions-framework": "^3.0.0",
-    "@google-cloud/dlp": "^5.12.0",
-    "@google-cloud/pubsub": "^4.10.0"
-  }
-}
+Hari 
+Phone: +44 1234 123456
+Email: hari@example.com
+Card Number: 4111 1111 1111 1111
+123 Some Street, London, UK

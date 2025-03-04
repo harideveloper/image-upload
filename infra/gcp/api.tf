@@ -7,12 +7,16 @@ resource "google_project_service" "apis" {
     "monitoring.googleapis.com",
     "iam.googleapis.com",
     "run.googleapis.com",
+    "servicenetworking.googleapis.com",
     # "iap.googleapis.com", 
     "cloudresourcemanager.googleapis.com",
     "dlp.googleapis.com",
     "serviceusage.googleapis.com",
     "pubsub.googleapis.com",
     "eventarc.googleapis.com",
+    "compute.googleapis.com",
+    "vpcaccess.googleapis.com",
+    "sqladmin.googleapis.com",
   ])
   project = var.project_id
   service = each.key

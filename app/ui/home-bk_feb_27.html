@@ -254,37 +254,22 @@
       <button onclick="fileUpload()">Upload Files</button>
       <button onclick="healthCheck()">Health Check</button>
       <button onclick="listAll()">View Files</button>
+
     </div>
     <div class="result" id="result"></div>
   </main>
   <footer>
     &copy; All rights reserved
   </footer>
-
   <script>
     const api = "https://europe-west2-dev2-ea8f.cloudfunctions.net/file-accessor";
 
-    // User IDs (Simulating 10 users)
-    const userIds = [
-      "user1", "user2", "user3", "user4", "user5", 
-      "user6", "user7", "user8", "user9", "user10"
-    ];
-
-    // Randomly pick a user ID
-    function getRandomUserId() {
-      const randomIndex = Math.floor(Math.random() * userIds.length);
-      return userIds[randomIndex];
-    }
-
-    // Generate correlation id
+    // generate correlation id
     function generateUniqueCorrelationId() {
-      const timestamp = Date.now(); // Add a timestamp to make the ID more unique
-      const randomString = Math.random().toString(36).substr(2, 9); // Random string part
-      return `correl-id-${timestamp}-${randomString}`; // Combine timestamp and random part
+      return 'correl-id-' + Math.random().toString(36).substr(2, 9);
     }
 
-
-    // Display results
+    // display results
     function displayResult(message, isError = false) {
       const resultElement = document.getElementById("result");
       resultElement.style.display = "block";
@@ -292,18 +277,12 @@
       if (isError) resultElement.style.color = "red";
     }
 
-    // View files
+    // view files
     async function listAll() {
       const fileListElement = document.getElementById("result");
       fileListElement.innerHTML = "Loading...";
 
       try {
-        // const userId = getRandomUserId();
-        // const response = await fetch(`${api}/listAll?userId=${userId}`);
-
-        const correlationId = generateUniqueCorrelationId();
-        const userId = getRandomUserId();
-
         const response = await fetch(`${api}/listAll`);
         const data = await response.json();
 
@@ -312,37 +291,36 @@
           return;
         }
 
-        const fileLinks = data.files.map(file => `<li><a href="#" onclick="fileDownload('${correlationId}', '${userId}', '${file}')">${file}</a></li>`).join("");
+        const fileLinks = data.files.map(file => `<li><a href="#" onclick="fileDownload('${file}')">${file}</a></li>`).join("");
         fileListElement.innerHTML = `<div class="result-list-header">Available Files:</div><ul>${fileLinks}</ul>`;
       } catch (error) {
         displayResult(`Error loading files: ${error.message}`, true);
       }
     }
 
-    // Healthcheck
+    // healthcheck
     async function healthCheck() {
       displayResult("Loading...");
       try {
-        // const userId = getRandomUserId();
-        // const response = await fetch(`${api}/health?userId=${userId}`);
         const response = await fetch(`${api}/health`);
         const data = await response.json();
 
         const healthMessage = `<span class="result-healthcheck">Status: ${data.message} | Timestamp: ${data.timestamp}</span>`;
+
         displayResult(healthMessage);
       } catch (error) {
         displayResult(`Unable to perform healthcheck: ${error.message}`, true);
       }
     }
 
-    // File download
-    async function fileDownload(correlationId, userId, fileName, ) {
+    // file download
+    async function fileDownload(fileName) {
       displayResult("Fetching download link...");
       try {
         const response = await fetch(`${api}/download`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ filename: fileName, userId: userId, correlationId: correlationId })
+          body: JSON.stringify({ filename: fileName })
         });
 
         if (!response.ok) {
@@ -360,7 +338,7 @@
           link.click();
 
           const fileDownloadCompletionMsg = `<span class="result-healthcheck">File "${fileName}" downloaded successfully.</span>`;
-          displayResult(fileDownloadCompletionMsg);
+          displayResult(fileDownloadCompletionMsg)
         } else {
           throw new Error("Failed to download file from signed URL");
         }
@@ -369,7 +347,7 @@
       }
     }
 
-    // Multiple file uploads
+    // multiple file uploads
     async function fileUpload() {
       const fileInput = document.getElementById("fileInput");
       const resultElement = document.getElementById("result");
@@ -383,8 +361,15 @@
       resultElement.innerHTML = `<div class="result-list-header">Uploading ${files.length} file(s)...</div>`;
       for (const file of files) {
         const correlationId = generateUniqueCorrelationId();
+        console.log(`correlationId for ${file.name}: ${correlationId}`); 
+        
+
         const fileId = `progress-${file.name.replace(/\s+/g, "-")}`; 
         const statusId = `status-${file.name.replace(/\s+/g, "-")}`;
+
+        // const modifiedFileName = `${correlationId}_${file.name}`;
+        // const fileId = `progress-${modifiedFileName.replace(/\s+/g, "-")}`;
+        // const statusId = `status-${modifiedFileName.replace(/\s+/g, "-")}`;
 
         resultElement.innerHTML += `
           <div class="file-upload-row">
@@ -395,8 +380,7 @@
         `;
 
         try {
-          const userId = getRandomUserId();
-          await uploadSingleFile(file, file.name, fileId, userId,correlationId ); 
+          await uploadSingleFile(file, file.name, fileId);
           document.getElementById(fileId).style.display = "none"; 
           document.getElementById(statusId).innerHTML = `<span class="success">✅ Uploaded</span>`;
         } catch (error) {
@@ -408,14 +392,15 @@
       fileInput.value = "";
     }
 
-    // Single file upload
-    async function uploadSingleFile(file, filename, progressId, userId, correlationId) {
+
+    // single file upload
+    async function uploadSingleFile(file, filename, progressId) {
       try {
-        // Get signed URL
+        // get signed url
         const response = await fetch(`${api}/upload`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ filename: filename, userId: userId, correlationId: correlationId }),
+          body: JSON.stringify({ filename: filename }),
         });
 
         if (!response.ok) {
@@ -426,22 +411,19 @@
         const data = await response.json();
         const signedUrl = data.signedUrl;
 
-        // Upload file using generated signed URL
+        // upload file using generated signed url
         return new Promise((resolve, reject) => {
           const xhr = new XMLHttpRequest();
           xhr.open("PUT", signedUrl, true);
           xhr.setRequestHeader("Content-Type", "application/octet-stream");
-          xhr.setRequestHeader("x-goog-meta-user-id", userId);
-          xhr.setRequestHeader("x-goog-meta-correlation-id", correlationId);
 
-          // Progress event listener
+          // progres event listener
           xhr.upload.onprogress = (event) => {
             if (event.lengthComputable) {
               const percentComplete = Math.round((event.loaded / event.total) * 100);
               document.getElementById(progressId).value = percentComplete;
             }
           };
-
           xhr.onload = () => (xhr.status === 200 ? resolve() : reject(new Error("Failed to upload file")));
           xhr.onerror = () => reject(new Error("Network error during file upload"));
           xhr.send(file);
@@ -454,4 +436,3 @@
 </body>
 
 </html>
-
