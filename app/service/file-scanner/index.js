@@ -42,7 +42,7 @@ const auditEntry = async (correlationId, userId, fileName, fileStatus) => {
   try {
     const filePath = `gs://${LANDING_BUCKET}/${fileName}`;
     const query = `
-      INSERT INTO file_acitivity_log (correlation_id, user_id, file_name, file_path, file_size, file_type, file_status, created_time)
+      INSERT INTO file_activity_log (correlation_id, user_id, file_name, file_path, file_size, file_type, file_status, created_time)
       VALUES ($1, $2, $3, $4, 0, 'application/octet-stream', $5, NOW());
     `;
     await pool.query(query, [correlationId, userId, fileName, filePath, fileStatus]);

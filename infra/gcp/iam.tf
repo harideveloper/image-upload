@@ -16,6 +16,18 @@ resource "google_project_iam_member" "builder_log_permissions" {
   member  = "serviceAccount:${google_service_account.builder.email}"
 }
 
+// file ui sa
+resource "google_service_account" "file_ui" {
+  account_id   = "file-ui"
+  display_name = "custom service account for file accessor ui"
+}
+
+resource "google_project_iam_member" "file_ui_log_permissions" {
+  project = var.project_id
+  role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${google_service_account.file_ui.email}"
+}
+
 // file accessor sa
 resource "google_service_account" "file_accessor" {
   account_id   = "file-accessor"

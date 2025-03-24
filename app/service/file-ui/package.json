@@ -1,0 +1,12 @@
+{
+  "name": "file-ui",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@google-cloud/functions-framework": "^3.0.0",
+    "@google-cloud/logging": "^11.2.0"
+  }
+}

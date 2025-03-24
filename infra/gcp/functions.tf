@@ -1,3 +1,74 @@
+// File Accessor UI 
+resource "google_storage_bucket" "ui_src_bucket" {
+  name                        = "${var.project_id}-ui-src-bucket"
+  location                    = var.region
+  force_destroy               = true
+  uniform_bucket_level_access = true
+}
+
+data "archive_file" "ui_build_archive" {
+  type        = "zip"
+  source_dir  = "${path.module}/../../app/service/file-ui"
+  output_path = "${path.module}/function-ui.zip"
+}
+
+resource "google_storage_bucket_object" "ui_build_archive" {
+  name         = "function.zip"
+  bucket       = google_storage_bucket.ui_src_bucket.name
+  source       = data.archive_file.ui_build_archive.output_path
+  content_type = "application/zip"
+}
+
+resource "google_cloudfunctions2_function" "file_ui" {
+  name     = "file-ui"
+  location = var.region
+
+  build_config {
+    runtime         = "nodejs22"
+    entry_point     = "fileUI"
+    service_account = google_service_account.builder.name
+    source {
+      storage_source {
+        bucket = google_storage_bucket.ui_src_bucket.name
+        object = google_storage_bucket_object.ui_build_archive.name
+      }
+    }
+  }
+
+  service_config {
+    max_instance_count = 1
+    available_memory   = "256M"
+    timeout_seconds    = 120
+
+    environment_variables = {
+      LANDING_BUCKET = google_storage_bucket.landing.name
+    }
+
+    vpc_connector = google_vpc_access_connector.connector.id
+    vpc_connector_egress_settings = "ALL_TRAFFIC"
+    # ingress_settings = "ALLOW_INTERNAL_ONLY"
+    service_account_email = google_service_account.file_ui.email
+  }
+
+  depends_on = [
+    google_storage_bucket.ui_src_bucket, 
+    google_service_account.file_ui,
+    google_vpc_access_connector.connector,
+  ]
+}
+
+
+resource "google_cloud_run_service_iam_binding" "file_ui_invoker" {
+  location = google_cloudfunctions2_function.file_ui.location
+  project  = google_cloudfunctions2_function.file_ui.project
+  service  = google_cloudfunctions2_function.file_ui.name
+  role     = "roles/run.invoker"
+  members = [
+    "allUsers",
+  ]
+}
+
+
 // File Accessor Service 
 resource "google_storage_bucket" "accessor_src_bucket" {
   name                        = "${var.project_id}-accessor-src-bucket"
@@ -52,7 +123,7 @@ resource "google_cloudfunctions2_function" "file_accessor" {
 
     vpc_connector = google_vpc_access_connector.connector.id
     vpc_connector_egress_settings = "ALL_TRAFFIC"
-    # ingress_settings = "ALLOW_INTERNAL_ONLY"
+    ingress_settings = "ALLOW_INTERNAL_ONLY"
     service_account_email = google_service_account.file_accessor.email
   }
 
@@ -69,7 +140,7 @@ resource "google_cloudfunctions2_function" "file_accessor" {
 }
 
 
-resource "google_cloud_run_service_iam_binding" "binding" {
+resource "google_cloud_run_service_iam_binding" "file_accessor_invoker" {
   location = google_cloudfunctions2_function.file_accessor.location
   project  = google_cloudfunctions2_function.file_accessor.project
   service  = google_cloudfunctions2_function.file_accessor.name
@@ -136,7 +207,7 @@ resource "google_cloudfunctions2_function" "file_scanner" {
     }
     vpc_connector = google_vpc_access_connector.connector.id
     vpc_connector_egress_settings = "ALL_TRAFFIC"
-    # ingress_settings = "ALLOW_INTERNAL_ONLY"
+    ingress_settings = "ALLOW_INTERNAL_ONLY"
     service_account_email = google_service_account.scanner.email
   }
 

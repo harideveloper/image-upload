@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>File Upload Capability</title>
+  <style>
+    body {
+      font-family: serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #fafafa, #e0f7fa);
+      color: #333;
+    }
+
+    header {
+      background-color: #08804d;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    main {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      font-size: 22px;
+      margin-bottom: 20px;
+      color: #174d00;
+      text-align: center;
+    }
+
+    p.description {
+      text-align: center;
+      font-size: 15px;
+      margin-bottom: 20px;
+      color: #444;
+      line-height: 1.6;
+    }
+
+    button {
+      padding: 6px 12px;
+      background: #08804d;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    button:hover {
+      background: #004d40;
+      transform: translateY(-2px);
+    }
+
+    .desc {
+      margin-top: 20px;
+      padding: 20px;
+      background: #f0f8f0;
+      border-radius: 5px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      font-size: 14px;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .desc ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .desc li {
+      padding: 5px 0;
+    }
+
+    .desc a {
+      text-decoration: none;
+      color: #00796b;
+      font-weight: bold;
+    }
+
+    .desc a:hover {
+      text-decoration: underline;
+      color: #004d40;
+    }
+
+    .desc-healthcheck {
+      color: #006064;
+      font-weight: bold;
+    }
+
+    input[type="file"] {
+      display: block;
+      margin: 15px auto;
+      padding: 10px;
+      font-size: 14px;
+      border: 2px solid #aac49e;
+      border-radius: 5px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    pre {
+      padding: 15px;
+      background-color: #e9f8ee;
+      border: 1px solid #a5e1b2;
+      border-radius: 5px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-family: serif;
+      font-size: 13px;
+      color: #0c2502;
+      display: none;
+      /* hide results section on page load */
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 12px;
+      color: #555;
+      padding: 10px 0;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .result {
+      /* display : none; */
+      margin-top: 20px;
+      padding: 20px;
+      background: #f0f8f0;
+      border-radius: 5px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      font-size: 14px;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .result ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .result li {
+      padding: 5px 0;
+    }
+
+    .result a {
+      text-decoration: none;
+      color: #00796b;
+      font-weight: bold;
+    }
+
+    .result a:hover {
+      text-decoration: underline;
+      color: #004d40;
+    }
+
+    .result-healthcheck {
+      color: #006064;
+      font-weight: bold;
+    }
+
+    .result-upload {
+      color: #00796b;
+      font-weight: bold;
+    }
+
+    .result-list-header {
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .file-upload-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .file-name {
+      flex: 2;
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .progress-bar {
+      flex: 3;
+      height: 8px;
+      border-radius: 4px;
+      transition: width 0.4s ease-in-out;
+    }
+
+    .upload-status {
+      flex: 1;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .success {
+      color: #388e3c;
+    }
+
+    .error {
+      color: #d32f2f;
+    }
+  </style>
+</head>
+
+<body>
+  <header>File Accessor Capability</header>
+  <main>
+    <h1>File Accessor Portal</h1>
+    <div class="desc" id="description">
+      <p class="description">
+      <h4>Please be aware that this tool is intended for secure file management. Please ensure you follow the guidelines
+        below to ensure compliance and avoid uploading sensitive or confidential information</h4>
+      <ul>
+        <li><strong>❌ Do not upload sensitive personal data</strong>, such as credit card numbers, personal
+          identification details, or confidential business documents, unless explicitly authorized to do so.</li>
+        <li><strong>✅ Ensure compliance</strong> with relevant data protection regulations when uploading files.</li>
+        <li><strong>❌ Do not upload PII data </strong> to check for any potential personal or confidential information
+          before uploading.</li>
+        <li><strong>✅ Review your files carefully</strong> to make sure they do not violate any privacy or security
+          policies.</li>
+      </ul>
+      By using this tool, you agree to comply with the security measures and data protection rules in place. For more
+      information on compliance and best practices, please refer to our terms of service.
+      </p>
+    </div>
+    <input type="file" id="fileInput" multiple />
+    <div class="button-container">
+      <button onclick="fileUpload()">Upload Files</button>
+      <button onclick="healthCheck()">Health Check</button>
+      <button onclick="listAll()">View Files</button>
+    </div>
+    <div class="result" id="result"></div>
+  </main>
+  <footer>
+    &copy; All rights reserved
+  </footer>
+
+  <script>
+    const api = "https://europe-west2-dev2-ea8f.cloudfunctions.net/file-accessor";
+
+    // User IDs (Simulating 10 users)
+    const userIds = [
+      "user1", "user2", "user3", "user4", "user5", 
+      "user6", "user7", "user8", "user9", "user10"
+    ];
+
+    // Randomly pick a user ID
+    function getRandomUserId() {
+      const randomIndex = Math.floor(Math.random() * userIds.length);
+      return userIds[randomIndex];
+    }
+
+    // Generate correlation id
+    function generateUniqueCorrelationId() {
+      const timestamp = Date.now(); // Add a timestamp to make the ID more unique
+      const randomString = Math.random().toString(36).substr(2, 9); // Random string part
+      return `correl-id-${timestamp}-${randomString}`; // Combine timestamp and random part
+    }
+
+
+    // Display results
+    function displayResult(message, isError = false) {
+      const resultElement = document.getElementById("result");
+      resultElement.style.display = "block";
+      resultElement.innerHTML = message;
+      if (isError) resultElement.style.color = "red";
+    }
+
+    // View files
+    async function listAll() {
+      const fileListElement = document.getElementById("result");
+      fileListElement.innerHTML = "Loading...";
+
+      try {
+        // const userId = getRandomUserId();
+        // const response = await fetch(`${api}/listAll?userId=${userId}`);
+
+        const correlationId = generateUniqueCorrelationId();
+        const userId = getRandomUserId();
+
+        const response = await fetch(`${api}/listAll`);
+        const data = await response.json();
+
+        if (!data.files || data.files.length === 0) {
+          displayResult("No files available.");
+          return;
+        }
+
+        const fileLinks = data.files.map(file => `<li><a href="#" onclick="fileDownload('${correlationId}', '${userId}', '${file}')">${file}</a></li>`).join("");
+        fileListElement.innerHTML = `<div class="result-list-header">Available Files:</div><ul>${fileLinks}</ul>`;
+      } catch (error) {
+        displayResult(`Error loading files: ${error.message}`, true);
+      }
+    }
+
+    // Healthcheck
+    async function healthCheck() {
+      displayResult("Loading...");
+      try {
+        // const userId = getRandomUserId();
+        // const response = await fetch(`${api}/health?userId=${userId}`);
+        const response = await fetch(`${api}/health`);
+        const data = await response.json();
+
+        const healthMessage = `<span class="result-healthcheck">Status: ${data.message} | Timestamp: ${data.timestamp}</span>`;
+        displayResult(healthMessage);
+      } catch (error) {
+        displayResult(`Unable to perform healthcheck: ${error.message}`, true);
+      }
+    }
+
+    // File download
+    async function fileDownload(correlationId, userId, fileName, ) {
+      displayResult("Fetching download link...");
+      try {
+        const response = await fetch(`${api}/download`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ filename: fileName, userId: userId, correlationId: correlationId })
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to obtain signed URL for download");
+        }
+
+        const { signedUrl } = await response.json();
+        const fileResponse = await fetch(signedUrl, { method: "GET", headers: { "Content-Type": "application/octet-stream" } });
+
+        if (fileResponse.ok) {
+          const blob = await fileResponse.blob();
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = fileName;
+          link.click();
+
+          const fileDownloadCompletionMsg = `<span class="result-healthcheck">File "${fileName}" downloaded successfully.</span>`;
+          displayResult(fileDownloadCompletionMsg);
+        } else {
+          throw new Error("Failed to download file from signed URL");
+        }
+      } catch (error) {
+        displayResult(`Unable to download file: ${error.message}`, true);
+      }
+    }
+
+    // Multiple file uploads
+    async function fileUpload() {
+      const fileInput = document.getElementById("fileInput");
+      const resultElement = document.getElementById("result");
+      const files = fileInput.files;
+
+      if (files.length === 0) {
+        alert("Please select files to upload.");
+        return;
+      }
+
+      resultElement.innerHTML = `<div class="result-list-header">Uploading ${files.length} file(s)...</div>`;
+      for (const file of files) {
+        const correlationId = generateUniqueCorrelationId();
+        const fileId = `progress-${file.name.replace(/\s+/g, "-")}`; 
+        const statusId = `status-${file.name.replace(/\s+/g, "-")}`;
+
+        resultElement.innerHTML += `
+          <div class="file-upload-row">
+            <span class="file-name">${file.name}</span>
+            <progress id="${fileId}" value="0" max="100" class="progress-bar"></progress>
+            <span id="${statusId}" class="upload-status">⌛ Uploading...</span>
+          </div>
+        `;
+
+        try {
+          const userId = getRandomUserId();
+          await uploadSingleFile(file, file.name, fileId, userId,correlationId ); 
+          document.getElementById(fileId).style.display = "none"; 
+          document.getElementById(statusId).innerHTML = `<span class="success">✅ Uploaded</span>`;
+        } catch (error) {
+          document.getElementById(fileId).style.display = "none"; 
+          document.getElementById(statusId).innerHTML = `<span class="error">❌ Failed</span>`;
+        }
+      }
+
+      fileInput.value = "";
+    }
+
+    // Single file upload
+    async function uploadSingleFile(file, filename, progressId, userId, correlationId) {
+      try {
+        // Get signed URL
+        const response = await fetch(`${api}/upload`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ filename: filename, userId: userId, correlationId: correlationId }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to generate signed URL");
+        }
+
+        const data = await response.json();
+        const signedUrl = data.signedUrl;
+
+        // Upload file using generated signed URL
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("PUT", signedUrl, true);
+          xhr.setRequestHeader("Content-Type", "application/octet-stream");
+          xhr.setRequestHeader("x-goog-meta-user-id", userId);
+          xhr.setRequestHeader("x-goog-meta-correlation-id", correlationId);
+
+          // Progress event listener
+          xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+              const percentComplete = Math.round((event.loaded / event.total) * 100);
+              document.getElementById(progressId).value = percentComplete;
+            }
+          };
+
+          xhr.onload = () => (xhr.status === 200 ? resolve() : reject(new Error("Failed to upload file")));
+          xhr.onerror = () => reject(new Error("Network error during file upload"));
+          xhr.send(file);
+        });
+      } catch (error) {
+        throw error;
+      }
+    }
+  </script>
+</body>
+
+</html>
+
