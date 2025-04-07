@@ -2,77 +2,41 @@
 <html>
 
 <head>
-    <title>Azure AD Authentication with MSAL.js (GCS)</title>
-    <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2"></script>
+    <title>Azure AD Auth Example</title>
+    <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
 </head>
 
 <body>
-    <h1>Azure AD Authentication Demo</h1>
-
-    <button id="loginButton" onclick="login()">Login with Azure AD</button>
-    <button id="logoutButton" onclick="logout()" style="display: none;">Logout</button>
-
-    <div id="userInfo" style="display: none;">
-        <h2>User Information:</h2>
-        <pre id="idTokenClaims"></pre>
-    </div>
+    <h1>Hello, Azure AD!</h1>
+    <button onclick="signIn()">Sign In</button>
+    <button onclick="signOut()">Sign Out</button>
 
     <script>
         const msalConfig = {
             auth: {
-                clientId: "YOUR_CLIENT_ID", // Replace with your Azure AD Application (client) ID
-                authority: "https://login.microsoftonline.com/YOUR_TENANT_ID", // Replace with your Azure AD Tenant ID or domain
-                redirectUri: window.location.origin // This should match the Redirect URI in your Azure AD App Registration
-            },
-            cache: {
-                cacheLocation: "localStorage", // You can also use sessionStorage
-                storeAuthStateInCookie: false
+                clientId: "YOUR_CLIENT_ID", // from Azure
+                authority: "https://login.microsoftonline.com/YOUR_TENANT_ID",
+                redirectUri: "https://your-gcp-site-url" // Must match Azure AD app
             }
         };
 
-        const myMSALObj = new msal.PublicClientApplication(msalConfig);
+        const msalInstance = new msal.PublicClientApplication(msalConfig);
 
-        async function login() {
+        async function signIn() {
             try {
-                const loginResponse = await myMSALObj.loginPopup({
-                    scopes: ["user.read"] // Add the scopes your application needs
+                const loginResponse = await msalInstance.loginPopup({
+                    scopes: ["user.read"] // or any other scope you need
                 });
-                console.log("Login successful:", loginResponse);
-                await displayUserInfo();
-            } catch (error) {
-                console.error("Login failed:", error);
+                alert("Signed in as: " + loginResponse.account.username);
+            } catch (err) {
+                console.error(err);
             }
         }
 
-        async function logout() {
-            try {
-                await myMSALObj.logoutPopup({});
-                document.getElementById("loginButton").style.display = "block";
-                document.getElementById("logoutButton").style.display = "none";
-                document.getElementById("userInfo").style.display = "none";
-                document.getElementById("idTokenClaims").textContent = "";
-            } catch (error) {
-                console.error("Logout failed:", error);
-            }
+        function signOut() {
+            const account = msalInstance.getAllAccounts()[0];
+            msalInstance.logoutPopup({ account });
         }
-
-        async function displayUserInfo() {
-            const account = myMSALObj.getAllAccounts()[0];
-            if (account) {
-                const tokenResponse = await myMSALObj.acquireTokenSilent({
-                    scopes: ["openid", "profile", "user.read"],
-                    account: account
-                });
-                console.log("ID Token:", tokenResponse.idToken);
-                document.getElementById("idTokenClaims").textContent = JSON.stringify(tokenResponse.idTokenClaims, null, 2);
-                document.getElementById("loginButton").style.display = "none";
-                document.getElementById("logoutButton").style.display = "block";
-                document.getElementById("userInfo").style.display = "block";
-            }
-        }
-
-        // Check if a user is already signed in on page load
-        displayUserInfo();
     </script>
 </body>
 
