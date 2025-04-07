@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Azure AD Auth Example</title>
+    <script src="https://alcdn.msauth.net/browser/2.39.0/js/msal-browser.min.js"></script>
+</head>
+
+<body>
+    <h1>Hello, Azure AD!</h1>
+    <button onclick="signIn()">Sign In</button>
+    <button onclick="signOut()">Sign Out</button>
+
+    <script>
+        const msalConfig = {
+            auth: {
+                clientId: "YOUR_CLIENT_ID", // from Azure
+                authority: "https://login.microsoftonline.com/YOUR_TENANT_ID",
+                redirectUri: "https://your-gcp-site-url" // Must match Azure AD app
+            }
+        };
+
+        const msalInstance = new msal.PublicClientApplication(msalConfig);
+
+        async function signIn() {
+            try {
+                const loginResponse = await msalInstance.loginPopup({
+                    scopes: ["user.read"] // or any other scope you need
+                });
+                alert("Signed in as: " + loginResponse.account.username);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function signOut() {
+            const account = msalInstance.getAllAccounts()[0];
+            msalInstance.logoutPopup({ account });
+        }
+    </script>
+</body>
+
+</html>
