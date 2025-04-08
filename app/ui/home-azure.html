@@ -172,10 +172,14 @@
         function showAppUI() {
             document.querySelector("main").style.display = "block";
         }
-
         window.onload = () => {
-            document.querySelector("main").style.display = "none";
-            ensureAuthenticated();
+            const accounts = msalInstance.getAllAccounts();
+            if (accounts.length > 0) {
+                console.log("Already signed in:", accounts[0].username);
+                document.getElementById("signOutBtn").style.display = "inline-block";
+                document.getElementById("authContainer").style.display = "none";
+                showAppUI();
+            }
         };
 
         // === File Portal Logic ===
