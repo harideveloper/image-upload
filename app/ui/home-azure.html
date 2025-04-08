@@ -133,7 +133,6 @@
     </main>
 
     <script>
-        // === Azure AD Login Config ===
         const msalConfig = {
             auth: {
                 clientId: "YOUR_CLIENT_ID", // 👈 Replace this
@@ -144,23 +143,16 @@
 
         const msalInstance = new msal.PublicClientApplication(msalConfig);
 
-        async function ensureAuthenticated() {
-            const accounts = msalInstance.getAllAccounts();
-
-            if (accounts.length === 0) {
-                try {
-                    const loginResponse = await msalInstance.loginPopup({
-                        scopes: ["user.read"]
-                    });
-                    console.log("Signed in as:", loginResponse.account.username);
-                    showAppUI();
-                } catch (err) {
-                    console.error("Login failed", err);
-                    alert("Authentication failed.");
-                }
-            } else {
-                console.log("Already signed in:", accounts[0].username);
+        async function signIn() {
+            try {
+                const loginResponse = await msalInstance.loginPopup({ scopes: ["user.read"] });
+                console.log("Signed in as:", loginResponse.account.username);
+                document.getElementById("signOutBtn").style.display = "inline-block";
+                document.getElementById("authContainer").style.display = "none";
                 showAppUI();
+            } catch (err) {
+                console.error("Login failed", err);
+                alert("Login failed: " + err.message);
             }
         }
 
@@ -172,6 +164,8 @@
         function showAppUI() {
             document.querySelector("main").style.display = "block";
         }
+
+        // Optional: auto-login if already signed in
         window.onload = () => {
             const accounts = msalInstance.getAllAccounts();
             if (accounts.length > 0) {
