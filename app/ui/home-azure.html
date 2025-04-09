@@ -1,143 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>File Accessor with Azure AD Auth</title>
+    <title>Azure AD Auth - Static App</title>
     <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
-    <style>
-        body {
-            font-family: serif;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #fafafa, #e0f7fa);
-            color: #333;
-        }
-
-        header {
-            background-color: #08804d;
-            color: white;
-            padding: 15px;
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            position: relative;
-        }
-
-        #signOutBtn {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            background: white;
-            color: #08804d;
-            border: none;
-            border-radius: 4px;
-            padding: 6px 12px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        main {
-            max-width: 600px;
-            margin: 40px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            font-size: 22px;
-            margin-bottom: 20px;
-            color: #174d00;
-            text-align: center;
-        }
-
-        .description {
-            font-size: 15px;
-            margin-bottom: 20px;
-            color: #444;
-            line-height: 1.6;
-        }
-
-        button {
-            padding: 6px 12px;
-            background: #08804d;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        input[type="file"] {
-            display: block;
-            margin: 15px auto;
-            padding: 10px;
-            font-size: 14px;
-            border: 2px solid #aac49e;
-            border-radius: 5px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .result {
-            margin-top: 20px;
-            padding: 20px;
-            background: #f0f8f0;
-            border-radius: 5px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            font-size: 14px;
-            color: #333;
-        }
-
-        .file-upload-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .success {
-            color: #388e3c;
-        }
-
-        .error {
-            color: #d32f2f;
-        }
-    </style>
 </head>
 
 <body>
-    <header>
-        File Accessor Capability
-        <button id="signOutBtn" onclick="signOut()">Sign Out</button>
-    </header>
-
-    <main style="display: none;">
-        <h1>Welcome to Secure File Upload Portal</h1>
-        <div class="description">
-            <p>✔ Upload files securely</p>
-            <p>❌ Avoid uploading sensitive/PII data</p>
-        </div>
-
-        <input type="file" id="fileInput" multiple />
-        <div class="button-container">
-            <button onclick="fileUpload()">Upload Files</button>
-            <button onclick="healthCheck()">Health Check</button>
-            <button onclick="listAll()">View Files</button>
-        </div>
-        <div class="result" id="result"></div>
-    </main>
+    <h1>Welcome to My App</h1>
+    <div id="auth-section">
+        <button onclick="signIn()">Sign In</button>
+    </div>
+    <div id="user-section" style="display: none;">
+        <p id="welcome-msg"></p>
+        <button onclick="signOut()">Sign Out</button>
+    </div>
 
     <script>
         const msalConfig = {
             auth: {
-                clientId: "YOUR_CLIENT_ID", // 👈 Replace this
-                authority: "https://login.microsoftonline.com/YOUR_TENANT_ID", // 👈 Replace this
-                redirectUri: window.location.origin
+                clientId: "YOUR_CLIENT_ID", // from Azure
+                authority: "https://login.microsoftonline.com/YOUR_TENANT_ID", // from Azure
+                redirectUri: "https://your-domain.com/" // EXACT match to Azure app
             }
         };
 
@@ -145,139 +29,33 @@
 
         async function signIn() {
             try {
-                const loginResponse = await msalInstance.loginPopup({ scopes: ["user.read"] });
-                console.log("Signed in as:", loginResponse.account.username);
-                document.getElementById("signOutBtn").style.display = "inline-block";
-                document.getElementById("authContainer").style.display = "none";
-                showAppUI();
+                const loginResponse = await msalInstance.loginPopup({
+                    scopes: ["user.read"]
+                });
+                showWelcomeMessage(loginResponse.account);
             } catch (err) {
-                console.error("Login failed", err);
-                alert("Login failed: " + err.message);
+                console.error("Login error:", err);
             }
         }
 
         function signOut() {
             const account = msalInstance.getAllAccounts()[0];
-            msalInstance.logoutPopup({ account });
+            msalInstance.logoutPopup({ account }).then(() => {
+                document.getElementById('auth-section').style.display = 'block';
+                document.getElementById('user-section').style.display = 'none';
+            });
         }
 
-        function showAppUI() {
-            document.querySelector("main").style.display = "block";
+        function showWelcomeMessage(account) {
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('user-section').style.display = 'block';
+            document.getElementById('welcome-msg').textContent = "Hello, " + account.username;
         }
 
-        // Optional: auto-login if already signed in
-        window.onload = () => {
-            const accounts = msalInstance.getAllAccounts();
-            if (accounts.length > 0) {
-                console.log("Already signed in:", accounts[0].username);
-                document.getElementById("signOutBtn").style.display = "inline-block";
-                document.getElementById("authContainer").style.display = "none";
-                showAppUI();
-            }
-        };
-
-        // === File Portal Logic ===
-        const api = "https://europe-west2-dev2-ea8f.cloudfunctions.net/file-accessor";
-        const userIds = ["user1", "user2", "user3", "user4", "user5", "user6", "user7", "user8", "user9", "user10"];
-
-        const getRandomUserId = () => userIds[Math.floor(Math.random() * userIds.length)];
-        const generateUniqueCorrelationId = () => `correl-id-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
-        function displayResult(message, isError = false) {
-            const el = document.getElementById("result");
-            el.style.display = "block";
-            el.innerHTML = message;
-            el.style.color = isError ? "red" : "#333";
-        }
-
-        async function listAll() {
-            displayResult("Loading...");
-            try {
-                const response = await fetch(`${api}/listAll`);
-                const data = await response.json();
-
-                if (!data.files || data.files.length === 0) {
-                    displayResult("No files available.");
-                    return;
-                }
-
-                const fileLinks = data.files.map(file =>
-                    `<li><a href="#" onclick="fileDownload('${generateUniqueCorrelationId()}', '${getRandomUserId()}', '${file}')">${file}</a></li>`
-                ).join("");
-                displayResult(`<div><strong>Available Files:</strong><ul>${fileLinks}</ul></div>`);
-            } catch (error) {
-                displayResult(`Error loading files: ${error.message}`, true);
-            }
-        }
-
-        async function healthCheck() {
-            displayResult("Loading...");
-            try {
-                const response = await fetch(`${api}/health`);
-                const data = await response.json();
-                displayResult(`Status: ${data.message} | Timestamp: ${data.timestamp}`);
-            } catch (error) {
-                displayResult(`Health check failed: ${error.message}`, true);
-            }
-        }
-
-        async function fileDownload(correlationId, userId, fileName) {
-            displayResult("Fetching download link...");
-            try {
-                const response = await fetch(`${api}/download`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ filename: fileName, userId, correlationId })
-                });
-
-                const { signedUrl } = await response.json();
-                const fileResp = await fetch(signedUrl);
-                const blob = await fileResp.blob();
-                const link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = fileName;
-                link.click();
-                displayResult(`✅ File "${fileName}" downloaded.`);
-            } catch (error) {
-                displayResult(`Download error: ${error.message}`, true);
-            }
-        }
-
-        async function fileUpload() {
-            const input = document.getElementById("fileInput");
-            const files = input.files;
-            if (files.length === 0) {
-                alert("Please select files to upload.");
-                return;
-            }
-
-            for (const file of files) {
-                const correlationId = generateUniqueCorrelationId();
-                const userId = getRandomUserId();
-
-                try {
-                    const res = await fetch(`${api}/upload`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ filename: file.name, userId, correlationId })
-                    });
-
-                    const { signedUrl } = await res.json();
-
-                    const xhr = new XMLHttpRequest();
-                    xhr.open("PUT", signedUrl);
-                    xhr.setRequestHeader("Content-Type", "application/octet-stream");
-                    xhr.setRequestHeader("x-goog-meta-user-id", userId);
-                    xhr.setRequestHeader("x-goog-meta-correlation-id", correlationId);
-                    xhr.onload = () => displayResult(`✅ Uploaded: ${file.name}`);
-                    xhr.onerror = () => displayResult(`❌ Failed: ${file.name}`, true);
-                    xhr.send(file);
-                } catch (err) {
-                    displayResult(`Upload error: ${err.message}`, true);
-                }
-            }
-
-            input.value = "";
+        // Automatically show user info if already logged in
+        const currentAccount = msalInstance.getAllAccounts()[0];
+        if (currentAccount) {
+            showWelcomeMessage(currentAccount);
         }
     </script>
 </body>
