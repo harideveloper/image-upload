@@ -2,26 +2,33 @@
 <html>
 
 <head>
-    <title>Azure AD Auth - Static App</title>
+    <title>Azure AD Auth Example</title>
     <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
 </head>
 
 <body>
-    <h1>Welcome to My App</h1>
-    <div id="auth-section">
+    <h1>Hello, Azure AD!</h1>
+    <div id="auth-buttons">
         <button onclick="signIn()">Sign In</button>
-    </div>
-    <div id="user-section" style="display: none;">
-        <p id="welcome-msg"></p>
         <button onclick="signOut()">Sign Out</button>
+    </div>
+
+    <div id="user-info" style="display: none;">
+        <h2>Welcome, <span id="username"></span>!</h2>
+        <h3>User Details:</h3>
+        <pre id="user-details"></pre>
     </div>
 
     <script>
         const msalConfig = {
             auth: {
-                clientId: "YOUR_CLIENT_ID", // from Azure
-                authority: "https://login.microsoftonline.com/YOUR_TENANT_ID", // from Azure
-                redirectUri: "https://your-domain.com/" // EXACT match to Azure app
+                clientId: "YOUR_CLIENT_ID", // Replace with your Azure AD Application (client) ID
+                authority: "https://login.microsoftonline.com/YOUR_TENANT_ID", // Replace with your Azure AD Directory (tenant) ID
+                redirectUri: "https://your-gcp-site-url" // Replace with your registered Redirect URI
+            },
+            cache: {
+                cacheLocation: "localStorage", // This configures where your cache will be stored
+                storeAuthStateInCookie: false, // Set this to "true" if you are having issues on IE11 or Edge
             }
         };
 
@@ -30,33 +37,97 @@
         async function signIn() {
             try {
                 const loginResponse = await msalInstance.loginPopup({
-                    scopes: ["user.read"]
+                    scopes: ["user.read"] // Request basic user profile information
                 });
-                showWelcomeMessage(loginResponse.account);
+                if (loginResponse && loginResponse.account) {
+                    showWelcomeMessage(loginResponse.account);
+                    await getUserDetails();
+                }
             } catch (err) {
-                console.error("Login error:", err);
+                console.error("Sign-in error:", err);
+                alert("Sign-in failed. See console for details.");
             }
         }
 
         function signOut() {
             const account = msalInstance.getAllAccounts()[0];
-            msalInstance.logoutPopup({ account }).then(() => {
-                document.getElementById('auth-section').style.display = 'block';
-                document.getElementById('user-section').style.display = 'none';
-            });
+            if (account) {
+                msalInstance.logoutPopup({ account: account })
+                    .then(() => {
+                        document.getElementById("user-info").style.display = "none";
+                        document.getElementById("auth-buttons").style.display = "block";
+                        alert("Signed out successfully.");
+                    })
+                    .catch((error) => {
+                        console.error("Sign-out error:", error);
+                    });
+            }
         }
 
         function showWelcomeMessage(account) {
-            document.getElementById('auth-section').style.display = 'none';
-            document.getElementById('user-section').style.display = 'block';
-            document.getElementById('welcome-msg').textContent = "Hello, " + account.username;
+            document.getElementById("username").textContent = account.username;
+            document.getElementById("auth-buttons").style.display = "none";
+            document.getElementById("user-info").style.display = "block";
         }
 
-        // Automatically show user info if already logged in
-        const currentAccount = msalInstance.getAllAccounts()[0];
-        if (currentAccount) {
-            showWelcomeMessage(currentAccount);
+        async function getUserDetails() {
+            try {
+                const request = {
+                    scopes: ["user.read"], // Ensure you have this scope
+                    account: msalInstance.getAllAccounts()[0] // Get the signed-in account
+                };
+
+                const response = await msalInstance.acquireTokenSilent(request);
+                const accessToken = response.accessToken;
+
+                // Call Microsoft Graph API to get user details
+                const graphEndpoint = "https://graph.microsoft.com/v1.0/me";
+                const headers = new Headers({
+                    Authorization: `Bearer ${accessToken}`
+                });
+
+                const graphResponse = await fetch(graphEndpoint, { headers });
+                const userData = await graphResponse.json();
+
+                document.getElementById("user-details").textContent = JSON.stringify(userData, null, 2);
+
+            } catch (error) {
+                console.error("Error getting user details:", error);
+                if (error instanceof msal.InteractionRequiredAuthError) {
+                    // Fallback to interaction if silent token acquisition fails
+                    msalInstance.acquireTokenPopup({ scopes: ["user.read"] })
+                        .then(response => {
+                            const accessToken = response.accessToken;
+                            // Retry fetching user details
+                            const graphEndpoint = "https://graph.microsoft.com/v1.0/me";
+                            const headers = new Headers({
+                                Authorization: `Bearer ${accessToken}`
+                            });
+                            return fetch(graphEndpoint, { headers });
+                        })
+                        .then(graphResponse => graphResponse.json())
+                        .then(userData => {
+                            document.getElementById("user-details").textContent = JSON.stringify(userData, null, 2);
+                        })
+                        .catch(err => {
+                            console.error("Error getting user details after interaction:", err);
+                        });
+                } else {
+                    alert("Failed to retrieve user details. See console for details.");
+                }
+            }
         }
+
+        // Check if a user is already signed in on page load
+        function checkSignedIn() {
+            const accounts = msalInstance.getAllAccounts();
+            if (accounts.length > 0) {
+                showWelcomeMessage(accounts[0]);
+                getUserDetails();
+            }
+        }
+
+        checkSignedIn();
     </script>
 </body>
 
