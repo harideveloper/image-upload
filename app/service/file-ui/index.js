@@ -25,23 +25,38 @@ functions.http('fileUI', async (req, res) => {
         }
       });
 
+      console.log("Backend status:", response.status);
+      console.log("Backend statusText:", response.statusText);
+      console.log("Backend headers:", JSON.stringify([...response.headers]));
+
+      const text = await response.text(); // Read raw response as text
+
+      console.log("Raw backend response body:", text);
+
       if (!response.ok) {
-        throw new Error(`Backend request failed with status: ${response.status}`);
+        throw new Error(`Backend request failed with status: ${response.status} ${response.statusText}`);
       }
 
-      const data = await response.json();
-      console.log("Backend Data:", data);
+      // Try to parse JSON after successful status
+      const data = JSON.parse(text);
+      console.log("Parsed backend data:", data);
+
       const healthCheck = {
         title: "Health Check",
         status: data
       };
-      console.log("Backend responseData:", healthCheck);
 
       res.json(healthCheck);
     } catch (error) {
-      res.status(500).json({ status: 'error', message: 'Backend health check failed', error: error.message });
+      console.error("Health check error:", error);
+      res.status(500).json({
+        status: 'error',
+        message: 'Backend health check failed',
+        error: error.message
+      });
     }
   } else {
+    // Serve static files
     let filePath = path.join(__dirname, 'public', req.path === '/home' ? 'home.html' : req.path);
 
     if (!fs.existsSync(filePath)) {
@@ -60,3 +75,4 @@ functions.http('fileUI', async (req, res) => {
     fs.createReadStream(filePath).pipe(res);
   }
 });
+
